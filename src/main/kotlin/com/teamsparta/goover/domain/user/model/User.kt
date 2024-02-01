@@ -1,5 +1,6 @@
 package com.teamsparta.goover.domain.user.model
 
+import com.teamsparta.goover.domain.post.model.Post
 import jakarta.persistence.*
 
 
@@ -23,12 +24,16 @@ class User (
     @Column(name = "role", nullable = false)
     var role: Role = Role.USER,
 
+    @OneToMany(mappedBy="user" , cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val posts: MutableList<Post> = mutableListOf()
+
 
 )
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
+
 
 
 

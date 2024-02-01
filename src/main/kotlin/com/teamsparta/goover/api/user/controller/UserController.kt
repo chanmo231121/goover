@@ -1,18 +1,13 @@
 package com.teamsparta.goover.api.user.controller
 
 import com.teamsparta.goover.api.user.dto.Request.UserLoginRequest
-import com.teamsparta.goover.api.user.dto.Response.UserResponse
 import com.teamsparta.goover.api.user.dto.Request.UserSignUpRequest
 import com.teamsparta.goover.api.user.dto.Response.LoginResponse
+import com.teamsparta.goover.api.user.dto.Response.UserResponse
 import com.teamsparta.goover.domain.user.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 
 @RestController

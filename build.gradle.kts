@@ -6,11 +6,7 @@ plugins {
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.noarg") version "1.8.22"
-
 }
-
-
-
 group = "com.teamsparta"
 version = "0.0.1-SNAPSHOT"
 
@@ -29,6 +25,7 @@ repositories {
 }
 
 dependencies {
+    implementation ("org.springframework.boot:spring-boot-starter-security")
    // implementation("com.sun.mail:jakarta.mail:1.6.7")
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
     implementation ("org.springframework.boot:spring-boot-starter-mail")
@@ -53,7 +50,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
+//    testImplementation("org.springframework.security:spring-security-test")
 //    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
 //    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
