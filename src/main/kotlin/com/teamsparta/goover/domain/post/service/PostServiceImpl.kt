@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 class PostServiceImpl(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository
-):PostService {
+) : PostService {
 
     @Transactional
     override fun create(request: PostCreateRequest): PostResponse {
@@ -31,6 +31,7 @@ class PostServiceImpl(
         val post = Post(
             title = request.title,
             content = request.content,
+            like = 0,
             user = userRepository.findById(userPrincipal.id)
                 .orElseThrow { IllegalArgumentException("User with id ${userPrincipal.id} not found") }
         )
@@ -55,7 +56,8 @@ class PostServiceImpl(
 
     @Transactional
     override fun update(postId: Long, request: PostUpdateRequest): PostResponse {
-        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as? UserPrincipal
+            ?: throw UnauthorizedException("로그인이 필요합니다.")
         val post = postRepository.findByIdOrNull(postId) ?: throw ModelNotFoundException("post", postId)
         if (post.user == null || post.user.id != userPrincipal.id) {
             throw IllegalArgumentException("작성자만 게시글을 수정할 수 있습니다.")
@@ -67,12 +69,33 @@ class PostServiceImpl(
     }
 
     override fun get(postId: Long): PostResponse {
-        val post = postRepository.findByIdOrNull(postId) ?: throw ModelNotFoundException("post",postId)
+        val post = postRepository.findByIdOrNull(postId) ?: throw ModelNotFoundException("post", postId)
         return post.toResponse()
     }
 
-
     override fun getAll(): List<PostResponse> {
         return postRepository.findAll().map { it.toResponse() }
+    }
+
+
+    @Transactional
+    override fun likePost(postId: Long) {
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as? UserPrincipal
+            ?: throw UnauthorizedException("로그인이 필요합니다.")
+        val post = postRepository.findWithLikesById(postId)
+            ?: throw ModelNotFoundException("Post", postId)
+        val user = userRepository.findByIdOrNull(userPrincipal.id)
+            ?: throw ModelNotFoundException("User", userPrincipal.id)
+
+        val userLiked = post.likes?.contains(user) ?: false
+
+        if (userLiked) {
+            post.likes?.remove(user)
+            post.like -= 1
+        } else {
+            post.likes?.add(user)
+            post.like += 1
+        }
+        postRepository.save(post)
     }
 }

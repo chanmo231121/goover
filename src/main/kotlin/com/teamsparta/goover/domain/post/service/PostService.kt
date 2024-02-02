@@ -11,5 +11,6 @@ interface PostService {
     fun update( postId: Long, updateRequest: PostUpdateRequest):PostResponse
     fun get(postId: Long,):PostResponse
     fun getAll():List<PostResponse>
+    fun likePost(postId: Long)
 
 }
