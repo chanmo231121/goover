@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
-@RequestMapping("/api/v1/post")
+@RequestMapping("/api/v1/posts")
 class PostController(
     private val postService: PostService
 ) {
@@ -44,20 +44,28 @@ class PostController(
     ): ResponseEntity<PostResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(postService.update(postId,postUpdateRequest))
+            .body(postService.update(postId, postUpdateRequest))
     }
-        @GetMapping("/{postId}")
-        fun getPost(@PathVariable postId: Long):ResponseEntity<PostResponse>{
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(postService.get(postId))
-        }
-        @GetMapping
-        fun getAllPost():ResponseEntity<List<PostResponse>>{
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(postService.getAll())
-        }
+
+    @GetMapping("/{postId}")
+    fun getPost(@PathVariable postId: Long): ResponseEntity<PostResponse> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(postService.get(postId))
+    }
+
+    @GetMapping
+    fun getAllPost(): ResponseEntity<List<PostResponse>> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(postService.getAll())
+    }
+
+    @PostMapping("/{postId}/like")
+    fun likePost(
+        @PathVariable postId: Long){
+        val postResponse = postService.likePost(postId)
+    }
 
 
 }
