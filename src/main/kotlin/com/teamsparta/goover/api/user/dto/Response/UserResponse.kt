@@ -7,6 +7,7 @@ data class UserResponse(
     var name:String,
     var email:String,
     var role:String,
+    var profilePicUrl: MutableList<String>,
 ){
     companion object{
         fun from(user: User): UserResponse {
@@ -14,7 +15,9 @@ data class UserResponse(
                 id = user.id!!,
                 email = user.email,
                 name = user.name,
-                role = user.role.name
+                role = user.role.name,
+                profilePicUrl = user.profilePicUrl
+
             )
         }
     }

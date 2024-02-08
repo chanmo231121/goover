@@ -7,6 +7,9 @@ import com.teamsparta.goover.domain.post.model.Post
 import com.teamsparta.goover.domain.post.model.toResponse
 import com.teamsparta.goover.domain.post.service.PostService
 import com.teamsparta.goover.infra.security.UserPrincipal
+import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -23,6 +26,7 @@ class PostController(
 
     @PostMapping
     fun createPost(
+        @Valid
         @RequestBody createRequest: PostCreateRequest
     ): ResponseEntity<PostResponse> {
         return ResponseEntity
@@ -59,8 +63,8 @@ class PostController(
     }
 
     @GetMapping()
-    fun getAllPosts(): ResponseEntity<List<PostResponse>> {
-        val posts = postService.getAll()
+    fun getAllPosts(pageable: Pageable): ResponseEntity<Page<PostResponse>> {
+        val posts = postService.getAllPost(pageable)
         return ResponseEntity.ok(posts.map { it.toResponse() })
     }
 
@@ -76,7 +80,7 @@ class PostController(
             val date = LocalDate.parse(dateStr)
             val startDate = date.atStartOfDay()
             val endDate = date.atTime(23, 59, 59)
-            val posts = postService.getPostsByCreatedAt(startDate, endDate)
+            val posts = postService.getAllPostsByCreatedAt(startDate, endDate)
             ResponseEntity.ok(posts)
         } catch (e: DateTimeParseException) {
             ResponseEntity.badRequest().build()

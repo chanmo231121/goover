@@ -11,6 +11,8 @@ import com.teamsparta.goover.global.exception.ModelNotFoundException
 import com.teamsparta.goover.global.exception.UnauthorizedException
 import com.teamsparta.goover.infra.security.UserPrincipal
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -29,12 +31,14 @@ class PostServiceImpl(
         val authentication = SecurityContextHolder.getContext().authentication
         val userPrincipal = authentication.principal as? UserPrincipal
             ?: throw UnauthorizedException("로그인이 필요합니다.")
+
+
         val post = Post(
             title = request.title,
             content = request.content,
             like = 0,
             user = userRepository.findById(userPrincipal.id)
-                .orElseThrow { IllegalArgumentException("User with id ${userPrincipal.id} not found") }
+                .orElseThrow { IllegalArgumentException("권한이 없습니다.") }
         )
         val savedPost = postRepository.save(post)
         return savedPost.toResponse()
@@ -74,15 +78,15 @@ class PostServiceImpl(
         return post.toResponse()
     }
 
-    override fun getAll(): List<Post> {
-        return postRepository.findAllByOrderByCreatedAtDesc()
+    override fun getAllPost(pageable: Pageable): Page<Post> {
+        return postRepository.findAllByOrderByCreatedAtDesc(pageable)
     }
 
     override fun getAllByTitle(title: String): List<PostResponse> {
         return postRepository.findByTitle(title).map { it.toResponse() }
     }
 
-    override fun getPostsByCreatedAt(startDate: LocalDateTime, endDate: LocalDateTime): List<Post> {
+    override fun getAllPostsByCreatedAt(startDate: LocalDateTime, endDate: LocalDateTime): List<Post> {
         return postRepository.findAllByCreatedAtBetween(startDate, endDate)
     }
 

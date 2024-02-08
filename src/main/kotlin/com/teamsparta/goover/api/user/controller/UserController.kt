@@ -1,11 +1,13 @@
 package com.teamsparta.goover.api.user.controller
 
+import com.teamsparta.goover.api.user.dto.Request.UpdateUserProfileRequest
 import com.teamsparta.goover.api.user.dto.Request.UserLoginRequest
 import com.teamsparta.goover.api.user.dto.Request.UserSignUpRequest
 import com.teamsparta.goover.api.user.dto.Response.LoginResponse
 import com.teamsparta.goover.api.user.dto.Response.UserResponse
 import com.teamsparta.goover.domain.user.service.UserService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,8 +19,14 @@ class UserController (
 ){
 
 
-    @PostMapping("/signup")
-    fun signup( @RequestBody signUpRequest: UserSignUpRequest): ResponseEntity<UserResponse>{
+    @PostMapping("/signup",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+
+    )
+    fun signup(
+        @ModelAttribute signUpRequest: UserSignUpRequest): ResponseEntity<UserResponse>{
+
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.signUp(signUpRequest))
@@ -38,6 +46,19 @@ class UserController (
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(userService.login(loginRequest))
+    }
+
+    @PutMapping("/{userId}/profile",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun updateUserProfile(
+        @PathVariable userId:Long,
+        @ModelAttribute updateUserProfileRequest: UpdateUserProfileRequest
+    ): ResponseEntity<UserResponse>{
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.updateUserProfile(userId,updateUserProfileRequest))
     }
 
 

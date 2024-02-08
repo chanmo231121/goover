@@ -5,6 +5,8 @@ import com.teamsparta.goover.api.post.dto.request.PostUpdateRequest
 import com.teamsparta.goover.api.post.dto.response.PostResponse
 import com.teamsparta.goover.domain.post.model.Post
 import com.teamsparta.goover.infra.security.UserPrincipal
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.time.LocalDateTime
 
 interface PostService {
@@ -12,10 +14,10 @@ interface PostService {
     fun delete(userPrincipal: UserPrincipal, postId: Long,):String
     fun update( postId: Long, updateRequest: PostUpdateRequest):PostResponse
     fun get(postId: Long,):PostResponse
-    fun getAll(): List<Post>
+    fun getAllPost(pageable: Pageable): Page<Post>
     fun likePost(postId: Long)
     fun getAllByTitle(title:String):List<PostResponse>
-    fun getPostsByCreatedAt(startDate: LocalDateTime, endDate: LocalDateTime): List<Post>
+    fun getAllPostsByCreatedAt(startDate: LocalDateTime, endDate: LocalDateTime): List<Post>
 
 
 
