@@ -3,7 +3,6 @@ package com.teamsparta.goover.infra.security
 
 import com.teamsparta.goover.infra.security.jwt.JwtAuthenticationFilter
 import com.teamsparta.goover.infra.security.jwt.JwtAuthenticationSuccessHandler
-import com.teamsparta.goover.infra.security.jwt.JwtAuthenticationToken
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -28,7 +27,8 @@ class SecurityConfig(
             .formLogin { it.disable() } // UsernamePassworedAuthenticationFilter, DefaultLoginPageGeneratingFilter, DefaultLogoutPageGeneratingFilter 제외
             .csrf { it.disable() } // CsrfFilter 제외
             .authorizeHttpRequests {
-                it.requestMatchers(
+                it
+                    .requestMatchers(
                     "/**"
 
                 )

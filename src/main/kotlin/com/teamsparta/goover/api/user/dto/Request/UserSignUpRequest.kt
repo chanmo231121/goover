@@ -32,7 +32,6 @@ data class UserSignUpRequest(
             name = name,
             email = email,
             password = password,
-            confirmpassword  = confirmpassword,
             role = memberRole
         )
     }

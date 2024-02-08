@@ -43,13 +43,11 @@ class UserServiceImpl(
         }
         val hashedPassword = passwordEncoder.encode(request.password)
         val user = userRepository.save(request.to().apply { password = hashedPassword })
-        val verificationCode = generateVerificationCode()
+        val verificationCode = UUID.randomUUID().toString().substring(0, 6)
         emailService.sendVerificationEmail(user.email, verificationCode)
         return UserResponse.from(user)
     }
-    private fun generateVerificationCode(): String {
-        return UUID.randomUUID().toString().substring(0, 6)
-    }
+
     @Transactional
     override fun checkNameExistence(name: String): Boolean {
         return userRepository.existsByName(name)

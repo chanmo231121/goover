@@ -1,5 +1,6 @@
 package com.teamsparta.goover.domain.post.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.teamsparta.goover.api.post.dto.response.PostResponse
 import com.teamsparta.goover.domain.comment.model.Comment
 import com.teamsparta.goover.domain.user.model.User
@@ -19,6 +20,7 @@ class Post(
     @Column(name = "like_count")
     var like: Long,
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
         name = "post_likes",
@@ -27,10 +29,12 @@ class Post(
     )
     var likes: MutableList<User> = mutableListOf(),
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "app_userid", nullable = false)
     val user: User,
 
+    @JsonIgnore
     @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     val comments: MutableList<Comment> = mutableListOf()
@@ -43,7 +47,7 @@ class Post(
 
 }
 
-fun Post.toResponse(): PostResponse {
+fun Post.toResponse(): PostResponse  {
     return PostResponse(
         id = id!!,
         title = title,
@@ -51,3 +55,4 @@ fun Post.toResponse(): PostResponse {
     )
 
 }
+
