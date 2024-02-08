@@ -15,9 +15,6 @@ class User (
     @Column(name = "password", nullable = false)
     var password:String,
 
-    @Column(name = "confirm_password", nullable = false)
-    var confirmpassword:String,
-
     @Column(name = "email", nullable = false)
     var email:String,
 

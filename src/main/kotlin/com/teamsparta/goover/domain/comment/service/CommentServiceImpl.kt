@@ -43,8 +43,8 @@ class CommentServiceImpl(
         if (comment.post.id != post.id) {
             throw ModelNotFoundException("comment", commentId)
         }
-        if (comment.user.id != userPrincipal.id) {
-            throw UnauthorizedException("다른 사람의 댓글을 삭제 할 수없습니다.")
+        if (!userPrincipal.isAdmin() && comment.user.id != userPrincipal.id) {
+            throw UnauthorizedException("댓글 삭제 권한이 없습니다.")
         }
         commentRepository.delete(comment)
         return "댓글이 성공적으로 삭제되었습니다."
@@ -56,8 +56,8 @@ class CommentServiceImpl(
             ?: throw UnauthorizedException("로그인이 필요합니다.")
         val comment = commentRepository.findByPostIdAndId(postId, commentId)
                 ?: throw ModelNotFoundException("comment", commentId)
-        if (comment.user.id != userPrincipal.id) {
-            throw UnauthorizedException("다른 사람의 댓글을 수정 할 수없습니다.")
+        if (!userPrincipal.isAdmin() && comment.user.id != userPrincipal.id) {
+            throw UnauthorizedException("댓글 수정 권한이 없습니다.")
         }
         comment.description = updateRequest.description
         val updatedComment = commentRepository.save(comment)

@@ -3,12 +3,16 @@ package com.teamsparta.goover.api.post.controller
 import com.teamsparta.goover.api.post.dto.request.PostCreateRequest
 import com.teamsparta.goover.api.post.dto.request.PostUpdateRequest
 import com.teamsparta.goover.api.post.dto.response.PostResponse
+import com.teamsparta.goover.domain.post.model.Post
+import com.teamsparta.goover.domain.post.model.toResponse
 import com.teamsparta.goover.domain.post.service.PostService
 import com.teamsparta.goover.infra.security.UserPrincipal
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 
 @RestController
@@ -54,16 +58,36 @@ class PostController(
             .body(postService.get(postId))
     }
 
-    @GetMapping
-    fun getAllPost(): ResponseEntity<List<PostResponse>> {
+    @GetMapping()
+    fun getAllPosts(): ResponseEntity<List<PostResponse>> {
+        val posts = postService.getAll()
+        return ResponseEntity.ok(posts.map { it.toResponse() })
+    }
+
+    @GetMapping("/title")
+    fun getAllByTitle(@RequestParam title: String): ResponseEntity<List<PostResponse>> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(postService.getAll())
+            .body(postService.getAllByTitle(title))
     }
+    @GetMapping("/created-at")
+    fun getPostsByCreatedAt(@RequestParam("date") dateStr: String): ResponseEntity<List<Post>> {
+        return try {
+            val date = LocalDate.parse(dateStr)
+            val startDate = date.atStartOfDay()
+            val endDate = date.atTime(23, 59, 59)
+            val posts = postService.getPostsByCreatedAt(startDate, endDate)
+            ResponseEntity.ok(posts)
+        } catch (e: DateTimeParseException) {
+            ResponseEntity.badRequest().build()
+        }
+    }
+
 
     @PostMapping("/{postId}/like")
     fun likePost(
-        @PathVariable postId: Long){
+        @PathVariable postId: Long
+    ) {
         val postResponse = postService.likePost(postId)
     }
 

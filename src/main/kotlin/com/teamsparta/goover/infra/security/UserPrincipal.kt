@@ -13,4 +13,8 @@ data class UserPrincipal(
         name,
         roles.map { SimpleGrantedAuthority("ROLE_$it") }
     )
+    fun isAdmin(): Boolean {
+        return authorities.any { it.authority == "ROLE_ADMIN" }
+    }
 }
+

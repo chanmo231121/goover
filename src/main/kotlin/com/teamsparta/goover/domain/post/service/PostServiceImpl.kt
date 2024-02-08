@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 
 @Service
@@ -46,8 +47,8 @@ class PostServiceImpl(
             return "게시글이 존재하지 않습니다."
         }
         val post = postRepository.findByIdOrNull(postId) ?: throw ModelNotFoundException("Post", postId)
-        if (post.user == null || userPrincipal.id != post.user.id) {
-            throw UnauthorizedException("다른 사용자의 게시글은 삭제할 수 없습니다.")
+        if (!userPrincipal.isAdmin() && userPrincipal.id != post.user?.id) {
+            throw UnauthorizedException("게시글 삭제 권한이 없습니다.")
         }
         postRepository.delete(post)
         return "게시글이 성공적으로 삭제완료되었습니다."
@@ -55,14 +56,14 @@ class PostServiceImpl(
 
 
     @Transactional
-    override fun update(postId: Long, request: PostUpdateRequest): PostResponse {
+    override fun update(postId: Long, updateRequest: PostUpdateRequest): PostResponse {
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as? UserPrincipal
             ?: throw UnauthorizedException("로그인이 필요합니다.")
         val post = postRepository.findByIdOrNull(postId) ?: throw ModelNotFoundException("post", postId)
-        if (post.user == null || post.user.id != userPrincipal.id) {
-            throw IllegalArgumentException("작성자만 게시글을 수정할 수 있습니다.")
+        if (!userPrincipal.isAdmin() && userPrincipal.id != post.user?.id) {
+            throw UnauthorizedException("게시글 수정 권한이 없습니다.")
         }
-        val (title, description) = request
+        val (title, description) = updateRequest
         post.title = title
         post.content = description
         return postRepository.save(post).toResponse()
@@ -73,8 +74,16 @@ class PostServiceImpl(
         return post.toResponse()
     }
 
-    override fun getAll(): List<PostResponse> {
-        return postRepository.findAll().map { it.toResponse() }
+    override fun getAll(): List<Post> {
+        return postRepository.findAllByOrderByCreatedAtDesc()
+    }
+
+    override fun getAllByTitle(title: String): List<PostResponse> {
+        return postRepository.findByTitle(title).map { it.toResponse() }
+    }
+
+    override fun getPostsByCreatedAt(startDate: LocalDateTime, endDate: LocalDateTime): List<Post> {
+        return postRepository.findAllByCreatedAtBetween(startDate, endDate)
     }
 
 
@@ -98,4 +107,8 @@ class PostServiceImpl(
         }
         postRepository.save(post)
     }
+
+
+
+
 }
