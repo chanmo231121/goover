@@ -2,6 +2,7 @@ package com.teamsparta.goover.api.user.dto.Request
 
 import com.teamsparta.goover.domain.user.model.Role
 import com.teamsparta.goover.domain.user.model.User
+import org.springframework.web.multipart.MultipartFile
 
 data class UserSignUpRequest(
 
@@ -10,7 +11,13 @@ data class UserSignUpRequest(
     var password:String,
     var confirmpassword:String,
     var role:String,
+    var profilePic:MutableList<MultipartFile>
+
 ){
+    fun isPicsEmpty(): Boolean {
+        return profilePic?.get(0)?.originalFilename == ""
+    }
+
     fun to():User{
 
        if (!name.matches(Regex("^[a-zA-Z0-9]{3,}$"))){
