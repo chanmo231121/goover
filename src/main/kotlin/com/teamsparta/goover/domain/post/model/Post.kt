@@ -5,6 +5,7 @@ import com.teamsparta.goover.api.post.dto.response.PostResponse
 import com.teamsparta.goover.domain.comment.model.Comment
 import com.teamsparta.goover.domain.user.model.User
 import com.teamsparta.goover.global.entity.BaseTimeEntity
+import com.teamsparta.goover.global.exception.StringMutableListConverter
 import jakarta.persistence.*
 
 @Entity
@@ -19,6 +20,10 @@ class Post(
 
     @Column(name = "like_count")
     var like: Long,
+
+    @Column(name = "post_pic_url", nullable = false)
+    @Convert(converter = StringMutableListConverter::class)
+    var postPicUrl: MutableList<String> = mutableListOf("https://imgur.com/S8jQ6wN"),
 
     @JsonIgnore
     @ManyToMany
@@ -51,7 +56,8 @@ fun Post.toResponse(): PostResponse  {
     return PostResponse(
         id = id!!,
         title = title,
-        content = content
+        content = content,
+        postPicUrl = postPicUrl
     )
 
 }
