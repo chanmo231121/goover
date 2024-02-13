@@ -14,12 +14,15 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 
 @Service
+@EnableScheduling
 class PostServiceImpl(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository
@@ -45,7 +48,9 @@ class PostServiceImpl(
     }
 
     @Transactional
-    override fun delete(userPrincipal: UserPrincipal, postId: Long): String {
+    override fun delete(postId: Long): String {
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as? UserPrincipal
+            ?: throw UnauthorizedException("로그인이 필요합니다.")
         val postExists = postRepository.existsById(postId)
         if (!postExists) {
             return "게시글이 존재하지 않습니다."
@@ -56,6 +61,23 @@ class PostServiceImpl(
         }
         postRepository.delete(post)
         return "게시글이 성공적으로 삭제완료되었습니다."
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    override fun deleteOldPosts() {
+        val currentDate = LocalDateTime.now()
+        val thresholdDate = currentDate.minusDays(90).toLocalDate()
+
+        val oldPosts = postRepository.findOldPosts(thresholdDate)
+        oldPosts.forEach{ post ->
+            try {
+                post.id?.let { delete(it) }
+            } catch (e:Exception){
+
+            //예외처리..??
+
+            }
+        }
     }
 
 
