@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
@@ -22,8 +23,12 @@ class PostController(
     private val postService: PostService
 ) {
 
-    @PostMapping
+    @PostMapping(
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun createPost(
+        @ModelAttribute
         @Valid
         @RequestBody createRequest: PostCreateRequest
     ): ResponseEntity<PostResponse> {
@@ -42,9 +47,13 @@ class PostController(
             .build()
     }
 
-    @PutMapping("/{postId}")
+    @PutMapping("/{postId}",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updatePost(
+
         @PathVariable postId: Long,
+        @ModelAttribute
         @RequestBody postUpdateRequest: PostUpdateRequest
     ): ResponseEntity<PostResponse> {
         return ResponseEntity

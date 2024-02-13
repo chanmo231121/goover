@@ -9,6 +9,7 @@ import com.teamsparta.goover.domain.post.repository.PostRepository
 import com.teamsparta.goover.domain.user.repository.UserRepository
 import com.teamsparta.goover.global.exception.ModelNotFoundException
 import com.teamsparta.goover.global.exception.UnauthorizedException
+import com.teamsparta.goover.infra.aws.S3Service
 import com.teamsparta.goover.infra.security.UserPrincipal
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
@@ -25,7 +26,9 @@ import java.time.LocalDateTime
 @EnableScheduling
 class PostServiceImpl(
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val s3Service: S3Service
+
 ) : PostService {
 
     @Transactional
@@ -35,17 +38,22 @@ class PostServiceImpl(
         val userPrincipal = authentication.principal as? UserPrincipal
             ?: throw UnauthorizedException("로그인이 필요합니다.")
 
+        val postPicUrls = s3Service.upload(request.postPic, "post_pics").map { it.toString() }.toMutableList()
 
         val post = Post(
             title = request.title,
             content = request.content,
             like = 0,
             user = userRepository.findById(userPrincipal.id)
-                .orElseThrow { IllegalArgumentException("권한이 없습니다.") }
+                .orElseThrow { IllegalArgumentException("권한이 없습니다.") },
+            postPicUrl = postPicUrls,
+
         )
         val savedPost = postRepository.save(post)
+
         return savedPost.toResponse()
     }
+
 
     @Transactional
     override fun delete(postId: Long): String {
@@ -69,12 +77,12 @@ class PostServiceImpl(
         val thresholdDate = currentDate.minusDays(90).toLocalDate()
 
         val oldPosts = postRepository.findOldPosts(thresholdDate)
-        oldPosts.forEach{ post ->
+        oldPosts.forEach { post ->
             try {
                 post.id?.let { delete(it) }
-            } catch (e:Exception){
+            } catch (e: Exception) {
 
-            //예외처리..??
+                //예외처리..??
 
             }
         }
@@ -92,6 +100,16 @@ class PostServiceImpl(
         val (title, description) = updateRequest
         post.title = title
         post.content = description
+
+        updateRequest.postPic?.let { newImages ->
+            val newImageUrls = mutableListOf<String>()
+            for (image in newImages) {
+                val imageUrl = s3Service.upload(updateRequest.postPic, "post_pics")
+                newImageUrls.add(imageUrl.toString())
+            }
+            post.postPicUrl = newImageUrls
+        }
+
         return postRepository.save(post).toResponse()
     }
 
@@ -133,8 +151,6 @@ class PostServiceImpl(
         }
         postRepository.save(post)
     }
-
-
 
 
 }
