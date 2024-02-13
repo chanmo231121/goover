@@ -6,13 +6,11 @@ import com.teamsparta.goover.api.post.dto.response.PostResponse
 import com.teamsparta.goover.domain.post.model.Post
 import com.teamsparta.goover.domain.post.model.toResponse
 import com.teamsparta.goover.domain.post.service.PostService
-import com.teamsparta.goover.infra.security.UserPrincipal
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
@@ -37,12 +35,11 @@ class PostController(
     @DeleteMapping("{postId}")
     fun deletePost(
         @PathVariable postId: Long,
-        @AuthenticationPrincipal userPrincipal: UserPrincipal
     ): ResponseEntity<String> {
-        val message = postService.delete(userPrincipal, postId)
+        postService.delete(postId)
         return ResponseEntity
-            .ok()
-            .body(message)
+            .status(HttpStatus.NO_CONTENT)
+            .build()
     }
 
     @PutMapping("/{postId}")
